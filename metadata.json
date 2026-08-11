@@ -1,0 +1,6 @@
+{
+  "name": "SRIKANDI BALI - Profil Organisasi & Kegiatan",
+  "description": "Website resmi organisasi SRIKANDI BALI, wadah pemberdayaan wanita Indonesia bersuamikan WNA, kegiatan amal, event mendatang, galeri kegiatan, dan portal admin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
