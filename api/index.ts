@@ -1,8 +1,14 @@
 import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 
+// Load environment variables from .env then .env.local
 dotenv.config();
+if (fs.existsSync(path.resolve(process.cwd(), ".env.local"))) {
+  dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
+}
 
 const app = express();
 app.use(express.json());
@@ -54,6 +60,61 @@ Jawablah dalam bahasa Indonesia yang santun, jelas, dan memberikan harapan.`;
       error: "Gagal memproses permintaan AI",
       details: error.message || String(error)
     });
+  }
+});
+
+app.get("/api/data", async (req, res) => {
+  try {
+    const binId = process.env.JSONBIN_BIN_ID;
+    const apiKey = process.env.JSONBIN_API_KEY;
+    if (!binId || !apiKey) {
+      console.warn("JSONBin credentials missing in environment variables.");
+      return res.status(500).json({ error: "Missing JSONBIN credentials" });
+    }
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: {
+        "X-Master-Key": apiKey
+      }
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`JSONBin GET failed with HTTP ${response.status}:`, errText);
+      return res.status(response.status).json({ error: "JSONBin GET request failed", details: errText });
+    }
+    const data = await response.json();
+    return res.json(data.record || data);
+  } catch (error: any) {
+    console.error("JSONBin GET Error:", error);
+    return res.status(500).json({ error: "Failed to fetch data from JSONBin" });
+  }
+});
+
+app.put("/api/data", async (req, res) => {
+  try {
+    const binId = process.env.JSONBIN_BIN_ID;
+    const apiKey = process.env.JSONBIN_API_KEY;
+    if (!binId || !apiKey) {
+      console.warn("JSONBin credentials missing in environment variables.");
+      return res.status(500).json({ error: "Missing JSONBIN credentials" });
+    }
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": apiKey
+      },
+      body: JSON.stringify(req.body)
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`JSONBin PUT failed with HTTP ${response.status}:`, errText);
+      return res.status(response.status).json({ error: "JSONBin PUT request failed", details: errText });
+    }
+    const data = await response.json();
+    return res.json({ success: true, record: data.record });
+  } catch (error: any) {
+    console.error("JSONBin PUT Error:", error);
+    return res.status(500).json({ error: "Failed to update data in JSONBin" });
   }
 });
 

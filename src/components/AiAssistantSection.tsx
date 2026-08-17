@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Sparkles, ChevronDown, ChevronUp, Send, Bot, Scale, BookOpen, RefreshCw } from 'lucide-react';
-import { legalFaqs } from '../data/initialData';
 import { Language, translations } from '../data/translations';
+import { LegalFaq } from '../types';
 
 interface AiAssistantSectionProps {
   language: Language;
   theme: 'dark' | 'light';
+  faqs: LegalFaq[];
 }
 
-export const AiAssistantSection: React.FC<AiAssistantSectionProps> = ({ language, theme }) => {
+export const AiAssistantSection: React.FC<AiAssistantSectionProps> = ({ language, theme, faqs }) => {
   const t = translations[language].aiAssistant;
 
   const [openFaqId, setOpenFaqId] = useState<string>('faq-1');
@@ -107,7 +108,7 @@ export const AiAssistantSection: React.FC<AiAssistantSectionProps> = ({ language
             </div>
 
             <div className="space-y-3">
-              {legalFaqs.map((faq) => {
+              {faqs.map((faq) => {
                 const isOpen = openFaqId === faq.id;
 
                 return (

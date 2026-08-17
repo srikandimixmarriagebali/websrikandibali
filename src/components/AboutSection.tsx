@@ -1,14 +1,15 @@
 import React from 'react';
 import { Heart, Users, Globe2, Briefcase, Building2, GraduationCap, HeartHandshake, Laptop, Award, MapPin } from 'lucide-react';
-import { memberProfessions } from '../data/initialData';
 import { Language, translations } from '../data/translations';
+import { MemberProfession } from '../types';
 
 interface AboutSectionProps {
   language: Language;
   theme: 'dark' | 'light';
+  professions: MemberProfession[];
 }
 
-export const AboutSection: React.FC<AboutSectionProps> = ({ language, theme }) => {
+export const AboutSection: React.FC<AboutSectionProps> = ({ language, theme, professions }) => {
   const t = translations[language].about;
 
   const getProfessionIcon = (iconName: string) => {
@@ -102,7 +103,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ language, theme }) =
 
               {/* Profession Progress List */}
               <div className="space-y-4">
-                {memberProfessions.map((item, idx) => (
+                {professions.map((item, idx) => (
                   <div key={idx} className="bg-rose-950/60 p-3.5 rounded-2xl border border-rose-800/60 hover:border-pink-500/50 transition-colors">
                     <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
                       <div className="flex items-center gap-2.5">

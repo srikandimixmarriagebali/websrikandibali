@@ -12,7 +12,6 @@ import { AdminPage } from './components/AdminPage';
 import { RsvpModal } from './components/RsvpModal';
 import { Footer } from './components/Footer';
 
-import { initialEvents, initialAlbums, initialCampaigns } from './data/initialData';
 import { Event, GalleryAlbum, CharityCampaign } from './types';
 import { Language } from './data/translations';
 
@@ -52,60 +51,97 @@ export default function App() {
     };
   }, []);
 
-  // Local state initialized with local storage or initial sample data
-  const [events, setEvents] = useState<Event[]>(() => {
-    const saved = localStorage.getItem('srikandi_events');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return initialEvents;
-      }
-    }
-    return initialEvents;
-  });
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isDirtyRef = React.useRef<boolean>(false);
 
-  const [albums, setAlbums] = useState<GalleryAlbum[]>(() => {
-    const saved = localStorage.getItem('srikandi_albums');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return initialAlbums;
-      }
-    }
-    return initialAlbums;
-  });
+  const [events, setEvents] = useState<Event[]>([]);
+  const [albums, setAlbums] = useState<GalleryAlbum[]>([]);
+  const [campaigns, setCampaigns] = useState<CharityCampaign[]>([]);
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [professions, setProfessions] = useState<any[]>([]);
 
-  const [campaigns, setCampaigns] = useState<CharityCampaign[]>(() => {
-    const saved = localStorage.getItem('srikandi_campaigns');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return initialCampaigns;
+  // Fetch fresh data from JSONBin on every mount / page open / refresh
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/data', { cache: 'no-store' });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.events && Array.isArray(data.events)) setEvents(data.events);
+        if (data.albums && Array.isArray(data.albums)) setAlbums(data.albums);
+        if (data.campaigns && Array.isArray(data.campaigns)) setCampaigns(data.campaigns);
+        if (data.faqs && Array.isArray(data.faqs)) setFaqs(data.faqs);
+        if (data.professions && Array.isArray(data.professions)) setProfessions(data.professions);
+      } else {
+        console.warn("API returned non-OK status, checking localStorage fallback");
+        const savedEvents = localStorage.getItem('srikandi_events');
+        const savedAlbums = localStorage.getItem('srikandi_albums');
+        const savedCampaigns = localStorage.getItem('srikandi_campaigns');
+        if (savedEvents) setEvents(JSON.parse(savedEvents));
+        if (savedAlbums) setAlbums(JSON.parse(savedAlbums));
+        if (savedCampaigns) setCampaigns(JSON.parse(savedCampaigns));
       }
+    } catch (err) {
+      console.error("Failed to fetch fresh data from server", err);
+      const savedEvents = localStorage.getItem('srikandi_events');
+      const savedAlbums = localStorage.getItem('srikandi_albums');
+      const savedCampaigns = localStorage.getItem('srikandi_campaigns');
+      if (savedEvents) setEvents(JSON.parse(savedEvents));
+      if (savedAlbums) setAlbums(JSON.parse(savedAlbums));
+      if (savedCampaigns) setCampaigns(JSON.parse(savedCampaigns));
+    } finally {
+      setIsDataLoaded(true);
+      setIsLoading(false);
     }
-    return initialCampaigns;
-  });
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   // Admin Mode & Modal states
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isAdminPanelOpen, setIsAdminPanelOpen] = useState<boolean>(false);
   const [selectedRsvpEvent, setSelectedRsvpEvent] = useState<Event | null>(null);
 
-  // Sync state to localStorage
+  // Sync state to localStorage as cache
   useEffect(() => {
-    localStorage.setItem('srikandi_events', JSON.stringify(events));
+    if (events.length > 0) localStorage.setItem('srikandi_events', JSON.stringify(events));
   }, [events]);
 
   useEffect(() => {
-    localStorage.setItem('srikandi_albums', JSON.stringify(albums));
+    if (albums.length > 0) localStorage.setItem('srikandi_albums', JSON.stringify(albums));
   }, [albums]);
 
   useEffect(() => {
-    localStorage.setItem('srikandi_campaigns', JSON.stringify(campaigns));
+    if (campaigns.length > 0) localStorage.setItem('srikandi_campaigns', JSON.stringify(campaigns));
   }, [campaigns]);
+
+  // Sync state to Server (JSONBin) only when user/admin makes modifications (isDirtyRef)
+  useEffect(() => {
+    if (!isDataLoaded || !isDirtyRef.current) return;
+
+    const handler = setTimeout(() => {
+      fetch('/api/data', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          events,
+          albums,
+          campaigns,
+          faqs,
+          professions
+        })
+      })
+        .then(() => {
+          isDirtyRef.current = false;
+        })
+        .catch(err => console.error("Failed to sync to server", err));
+    }, 1500);
+
+    return () => clearTimeout(handler);
+  }, [events, albums, campaigns, faqs, professions, isDataLoaded]);
 
   // Admin Handler Actions
   const handleToggleAdminMode = () => {
@@ -119,15 +155,18 @@ export default function App() {
   };
 
   const handleAddEvent = (newEvent: Event) => {
+    isDirtyRef.current = true;
     setEvents((prev) => [newEvent, ...prev]);
   };
 
   const handleUpdateEvent = (updatedEvent: Event) => {
+    isDirtyRef.current = true;
     setEvents((prev) => prev.map((e) => (e.id === updatedEvent.id ? updatedEvent : e)));
   };
 
   const handleDeleteEvent = (eventId: string) => {
     if (confirm('Apakah Anda yakin ingin menghapus event ini?')) {
+      isDirtyRef.current = true;
       setEvents((prev) => prev.filter((e) => e.id !== eventId));
     }
   };
@@ -136,6 +175,7 @@ export default function App() {
     const targetEvent = events.find((e) => e.id === eventId);
     if (!targetEvent) return;
 
+    isDirtyRef.current = true;
     setEvents((prev) =>
       prev.map((e) => (e.id === eventId ? { ...e, status: 'finished' } : e))
     );
@@ -165,10 +205,12 @@ export default function App() {
   };
 
   const handleAddAlbum = (newAlbum: GalleryAlbum) => {
+    isDirtyRef.current = true;
     setAlbums((prev) => [newAlbum, ...prev]);
   };
 
   const handleAddPhotoToAlbum = (albumId: string, url: string, caption: string) => {
+    isDirtyRef.current = true;
     setAlbums((prev) =>
       prev.map((alb) => {
         if (alb.id === albumId) {
@@ -187,11 +229,13 @@ export default function App() {
 
   const handleDeleteAlbum = (albumId: string) => {
     if (confirm('Hapus album galeri ini?')) {
+      isDirtyRef.current = true;
       setAlbums((prev) => prev.filter((a) => a.id !== albumId));
     }
   };
 
   const handleDonateToCampaign = (campaignId: string, amount: number) => {
+    isDirtyRef.current = true;
     setCampaigns((prev) =>
       prev.map((c) => {
         if (c.id === campaignId) {
@@ -207,6 +251,7 @@ export default function App() {
   };
 
   const handleConfirmRegistration = (eventId: string) => {
+    isDirtyRef.current = true;
     setEvents((prev) =>
       prev.map((e) => {
         if (e.id === eventId) {
@@ -217,15 +262,23 @@ export default function App() {
     );
   };
 
-  const handleResetData = () => {
-    if (confirm('Apakah Anda yakin ingin mengembalikan semua data event & galeri ke sampel awal Srikandi Bali?')) {
+  const handleResetData = async () => {
+    if (confirm('Apakah Anda yakin ingin mengembalikan semua data dari server/JSONBin?')) {
       localStorage.removeItem('srikandi_events');
       localStorage.removeItem('srikandi_albums');
       localStorage.removeItem('srikandi_campaigns');
-      setEvents(initialEvents);
-      setAlbums(initialAlbums);
-      setCampaigns(initialCampaigns);
-      alert('Data telah dikembalikan ke sampel awal Srikandi Bali.');
+      try {
+        const response = await fetch('/api/data');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.events) setEvents(data.events);
+          if (data.albums) setAlbums(data.albums);
+          if (data.campaigns) setCampaigns(data.campaigns);
+          alert('Data telah dikembalikan ke data server terbaru.');
+        }
+      } catch (err) {
+        alert('Gagal mengambil data dari server.');
+      }
     }
   };
 
@@ -293,6 +346,7 @@ export default function App() {
         <AboutSection
           language={language}
           theme={theme}
+          professions={professions}
         />
 
         {/* Section: Visi & Misi */}
@@ -336,6 +390,7 @@ export default function App() {
         <AiAssistantSection
           language={language}
           theme={theme}
+          faqs={faqs}
         />
       </main>
 

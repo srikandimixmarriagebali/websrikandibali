@@ -1,5 +1,13 @@
-import express from "express";
+import dotenv from "dotenv";
+import fs from "fs";
 import path from "path";
+
+dotenv.config();
+if (fs.existsSync(path.resolve(process.cwd(), ".env.local"))) {
+  dotenv.config({ path: path.resolve(process.cwd(), ".env.local"), override: true });
+}
+
+import express from "express";
 import { createServer as createViteServer } from "vite";
 import app from "./api/index";
 
