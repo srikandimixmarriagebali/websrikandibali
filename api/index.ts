@@ -35,8 +35,12 @@ function getGoogleAuth() {
   if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     try {
       let jsonStr = process.env.GOOGLE_SERVICE_ACCOUNT_JSON.trim();
+      // Remove accidental surrounding quotes
+      if ((jsonStr.startsWith('"') && jsonStr.endsWith('"')) || (jsonStr.startsWith("'") && jsonStr.endsWith("'"))) {
+        jsonStr = jsonStr.slice(1, -1);
+      }
       // Handle base64 if user encoded it
-      if (jsonStr.startsWith('eyJ') || !jsonStr.startsWith('{')) {
+      if (jsonStr.startsWith('eyJ') || (!jsonStr.startsWith('{') && !jsonStr.startsWith('%7B'))) {
         jsonStr = Buffer.from(jsonStr, 'base64').toString('utf8');
       }
       const credentials = JSON.parse(jsonStr);
@@ -66,25 +70,74 @@ function getGoogleAuth() {
 
   // Option 3: Separate EMAIL & PRIVATE_KEY Environment Variables
   if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY.trim();
+    if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
+      privateKey = privateKey.slice(1, -1);
+    }
+    privateKey = privateKey.replace(/\\n/g, "\n");
+
     return new google.auth.GoogleAuth({
       credentials: {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL.trim(),
+        private_key: privateKey,
       },
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
   }
 
-  throw new Error("Google Service Account credentials not found. Please set GOOGLE_SERVICE_ACCOUNT_JSON in Environment Variables");
+  throw new Error("Google Service Account credentials not found. Please set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SERVICE_ACCOUNT_EMAIL + GOOGLE_PRIVATE_KEY in Vercel Environment Variables");
 }
 
-// API Health Check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+const router = express.Router();
+
+// Diagnostic API Health Check (accessible at /api/health or /health)
+router.get("/health", async (req, res) => {
+  const spreadsheetId = getSpreadsheetId();
+  const envStatus = {
+    hasSpreadsheetId: Boolean(spreadsheetId),
+    spreadsheetIdPreview: spreadsheetId ? `${spreadsheetId.slice(0, 6)}...${spreadsheetId.slice(-4)}` : "NOT_SET",
+    hasServiceAccountJson: Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
+    hasServiceAccountEmail: Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL),
+    hasPrivateKey: Boolean(process.env.GOOGLE_PRIVATE_KEY),
+    hasLocalKeyFile: fs.existsSync(path.resolve(process.cwd(), "data", "google-service-account.json")),
+    nodeEnv: process.env.NODE_ENV || "development",
+    timestamp: new Date().toISOString(),
+  };
+
+  try {
+    const auth = getGoogleAuth();
+    const sheets = google.sheets({ version: "v4", auth });
+    
+    if (!spreadsheetId) {
+      return res.status(500).json({
+        status: "error",
+        message: "SPREADSHEET_ID is missing in environment variables",
+        diagnostics: envStatus,
+      });
+    }
+
+    const testRes = await sheets.spreadsheets.get({ spreadsheetId });
+    const tabNames = (testRes.data.sheets || []).map((s) => s.properties?.title || "");
+
+    return res.json({
+      status: "connected",
+      message: "Successfully connected to Google Sheets!",
+      sheetTitle: testRes.data.properties?.title,
+      tabs: tabNames,
+      diagnostics: envStatus,
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      status: "connection_error",
+      message: err.message,
+      troubleshooting: "Pastikan GOOGLE_SERVICE_ACCOUNT_JSON dan SPREADSHEET_ID sudah diisi di Vercel Environment Variables, serta Google Sheet sudah di-share ke email Service Account sebagai Editor.",
+      diagnostics: envStatus,
+    });
+  }
 });
 
 // GET Database directly from Google Sheets with High-Speed In-Memory Cache
-app.get("/api/data", async (req, res) => {
+router.get("/data", async (req, res) => {
   const now = Date.now();
 
   // Return from in-memory cache if fresh
@@ -234,7 +287,7 @@ app.get("/api/data", async (req, res) => {
 });
 
 // POST /api/register-event: Appends new participant to 'Peserta' sheet
-app.post("/api/register-event", async (req, res) => {
+router.post("/register-event", async (req, res) => {
   const spreadsheetId = getSpreadsheetId();
   const { even_id, nama, phone = "", email = "" } = req.body;
 
@@ -277,7 +330,7 @@ app.post("/api/register-event", async (req, res) => {
 });
 
 // POST /api/donate: Appends new donation intent to 'Donatur' sheet with status 'not' (pending confirmation)
-app.post("/api/donate", async (req, res) => {
+router.post("/donate", async (req, res) => {
   const spreadsheetId = getSpreadsheetId();
   const { id_Campaigns, nama, jumlah_donasi } = req.body;
 
@@ -320,7 +373,7 @@ app.post("/api/donate", async (req, res) => {
 });
 
 // PUT / Update Database directly to Google Sheets structured tabs
-app.put("/api/data", async (req, res) => {
+router.put("/data", async (req, res) => {
   const spreadsheetId = getSpreadsheetId();
 
   if (spreadsheetId) {
@@ -441,5 +494,9 @@ app.put("/api/data", async (req, res) => {
 
   return res.status(500).json({ error: "Missing SPREADSHEET_ID" });
 });
+
+// Mount router on both /api (when called with /api prefix) and / (when prefix stripped by Vercel)
+app.use("/api", router);
+app.use("/", router);
 
 export default app;
