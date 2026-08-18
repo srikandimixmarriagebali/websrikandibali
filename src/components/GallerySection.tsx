@@ -2,23 +2,20 @@ import React, { useState } from 'react';
 import { Image as ImageIcon, Search, Calendar, MapPin, Heart, X, ChevronLeft, ChevronRight, Share2, Check, Trash2 } from 'lucide-react';
 import { GalleryAlbum } from '../types';
 import { Language, translations } from '../data/translations';
+import { DriveImage } from './DriveImage';
 
 interface GallerySectionProps {
   language: Language;
   theme: 'dark' | 'light';
   albums: GalleryAlbum[];
-  isAdmin: boolean;
-  onAddPhotoToAlbum?: (albumId: string) => void;
-  onDeleteAlbum?: (albumId: string) => void;
+  isLoading?: boolean;
 }
 
 export const GallerySection: React.FC<GallerySectionProps> = ({
   language,
   theme,
   albums,
-  isAdmin,
-  onAddPhotoToAlbum,
-  onDeleteAlbum
+  isLoading = false
 }) => {
   const t = translations[language].gallery;
 
@@ -116,8 +113,29 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
           </div>
         </div>
 
-        {/* Grid */}
-        {filteredAlbums.length > 0 ? (
+        {/* Grid / Skeleton */}
+        {isLoading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className="rounded-3xl bg-slate-800/90 border border-slate-700 overflow-hidden shadow-xl animate-pulse flex flex-col justify-between"
+              >
+                <div className="h-56 bg-slate-900/60 relative flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-pink-500/20 animate-ping" />
+                </div>
+                <div className="p-6 space-y-3">
+                  <div className="h-5 bg-pink-500/20 rounded w-3/4" />
+                  <div className="h-4 bg-slate-700/50 rounded w-full" />
+                  <div className="h-4 bg-slate-700/50 rounded w-2/3" />
+                </div>
+                <div className="px-6 pb-6 pt-2 border-t border-slate-700/60 flex items-center justify-between">
+                  <div className="h-9 w-28 bg-rose-600/30 rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredAlbums.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredAlbums.map((album) => (
               <div
@@ -126,10 +144,9 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
               >
                 <div>
                   <div className="relative h-56 overflow-hidden cursor-pointer" onClick={() => openLightbox(album, 0)}>
-                    <img
+                    <DriveImage
                       src={album.coverImage}
                       alt={album.title}
-                      referrerPolicy="no-referrer"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80" />
@@ -187,16 +204,6 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                     <ImageIcon className="w-4 h-4" />
                     {t.viewPhotos}
                   </button>
-
-                  {isAdmin && onDeleteAlbum && (
-                    <button
-                      onClick={() => onDeleteAlbum(album.id)}
-                      className="text-rose-400 hover:text-rose-300 p-2 rounded-lg hover:bg-rose-900/40"
-                      title="Delete Album"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
                 </div>
 
               </div>
@@ -233,10 +240,9 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
             </div>
 
             <div className="relative flex-1 min-h-[300px] sm:min-h-[450px] flex items-center justify-center bg-slate-950 rounded-2xl overflow-hidden border border-slate-800">
-              <img
+              <DriveImage
                 src={selectedAlbum.photos[activePhotoIndex].url}
                 alt={selectedAlbum.photos[activePhotoIndex].caption}
-                referrerPolicy="no-referrer"
                 className="max-h-[70vh] w-auto max-w-full object-contain rounded-lg shadow-2xl"
               />
 

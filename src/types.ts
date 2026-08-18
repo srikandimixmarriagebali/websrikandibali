@@ -73,3 +73,29 @@ export interface LegalFaq {
   answer: string;
   category: 'Perjanjian Perkawinan' | 'Kewarganegaraan Anak' | 'Hak Milik & Properti' | 'Imigrasi & Kitas';
 }
+
+export interface EventParticipant {
+  id?: string;
+  even_id: string;
+  nama: string;
+  phone?: string;
+  email?: string;
+  registered_at?: string;
+}
+
+export interface DonorRecord {
+  id?: string;
+  id_Campaigns: string;
+  nama: string;
+  jumlah_donasi: number;
+  status: 'konfirm' | 'not' | 'pending';
+  tanggal?: string;
+}
+
+export interface BankAccount {
+  bank_name: string;
+  account_number: string;
+  account_holder: string;
+  branch?: string;
+  is_active: boolean;
+}

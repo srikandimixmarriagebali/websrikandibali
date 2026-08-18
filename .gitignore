@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+*.bak
+data/*.json
+src/data/*.json
+*google-service-account*.json
+*lunar-shift*.json

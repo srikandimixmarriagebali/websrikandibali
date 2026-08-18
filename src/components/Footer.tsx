@@ -97,10 +97,7 @@ export const Footer: React.FC<FooterProps> = ({ language, theme }) => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-rose-900/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-rose-300/80">
           <p className="flex items-center gap-2">
-            <span>© 2026 SRIKANDI BALI. Non-Profit Organization.</span>
-            <a href="#/admin" className="opacity-40 hover:opacity-100 text-[10px] text-pink-300 hover:text-white transition-opacity">
-              [Admin Portal]
-            </a>
+            <span>© 2026 SRIKANDI BALI. Non-Profit Organization. All rights reserved.</span>
           </p>
 
           <button

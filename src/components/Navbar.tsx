@@ -49,8 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { name: t.vision, href: '#visi-misi' },
     { name: t.events, href: '#events', badge: upcomingCount },
     { name: t.gallery, href: '#galeri' },
-    { name: t.charity, href: '#amal' },
-    { name: t.aiConsultation, href: '#konsultasi-ai', isAi: true }
+    { name: t.charity, href: '#amal' }
   ];
 
   return (
@@ -98,15 +97,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               <a
                 key={link.name}
                 href={link.href}
-                className={`px-3 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 ${
-                  link.isAi
-                    ? 'bg-gradient-to-r from-pink-600/20 to-fuchsia-600/20 text-pink-500 hover:text-pink-600 border border-pink-500/30'
-                    : theme === 'dark'
-                      ? 'text-rose-100/90 hover:text-white hover:bg-rose-900/60'
-                      : 'text-slate-700 hover:text-rose-900 hover:bg-rose-50'
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                  theme === 'dark'
+                    ? 'text-rose-100/90 hover:text-white hover:bg-rose-900/60'
+                    : 'text-slate-700 hover:text-rose-900 hover:bg-rose-50'
                 }`}
               >
-                {link.isAi && <Sparkles className="w-3.5 h-3.5 text-pink-500 animate-spin" style={{ animationDuration: '4s' }} />}
                 {link.name}
                 {link.badge !== undefined && link.badge > 0 && (
                   <span className="ml-1 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce">
@@ -198,10 +194,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-slate-800 hover:bg-rose-50 border border-rose-100'
               }`}
             >
-              <span className="flex items-center gap-2">
-                {link.isAi && <Sparkles className="w-4 h-4 text-pink-500" />}
-                {link.name}
-              </span>
+              <span>{link.name}</span>
               {link.badge !== undefined && link.badge > 0 && (
                 <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                   {link.badge}

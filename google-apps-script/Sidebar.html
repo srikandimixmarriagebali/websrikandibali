@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary: #be123c;
+        --primary-dark: #881337;
+        --primary-light: #ffe4e6;
+        --accent: #f43f5e;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --success: #10b981;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+
+      body {
+        background-color: #f1f5f9;
+        color: var(--text);
+        padding: 20px;
+        font-size: 13px;
+        min-height: 100vh;
+      }
+
+      .app-container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary), #e11d48);
+        color: white;
+        padding: 20px 24px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 25px -5px rgba(190, 18, 60, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .logo-icon {
+        width: 44px;
+        height: 44px;
+        background: white;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      }
+
+      .header h1 {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+
+      .header p {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+
+      .header-badge {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      /* Navigation Tabs */
+      .nav-tabs {
+        display: flex;
+        background: white;
+        padding: 6px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        gap: 6px;
+      }
+
+      .nav-tab {
+        flex: 1;
+        background: transparent;
+        border: none;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-muted);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .nav-tab.active {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        color: white;
+        box-shadow: 0 4px 12px rgba(190, 18, 60, 0.2);
+      }
+
+      /* Tab Content */
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.25s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Cards */
+      .card {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 24px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        margin-bottom: 20px;
+      }
+
+      .card-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      /* Forms Grid */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+
+      .form-group {
+        margin-bottom: 14px;
+      }
+
+      .form-group.full-width {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="date"],
+      input[type="time"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        font-size: 13px;
+        background: #fdfdfd;
+        transition: all 0.2s;
+      }
+
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.1);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: white;
+        box-shadow: 0 4px 12px rgba(190, 18, 60, 0.25);
+        width: 100%;
+      }
+
+      .btn-primary:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(190, 18, 60, 0.35);
+      }
+
+      .btn-outline {
+        background: white;
+        border: 1.5px solid var(--border);
+        color: var(--text);
+      }
+
+      .btn-outline:hover {
+        background: var(--bg);
+        border-color: var(--primary);
+      }
+
+      /* Status Alert */
+      .alert {
+        padding: 14px 18px;
+        border-radius: 14px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: none;
+      }
+
+      .alert-success {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+
+      .alert-error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+
+      /* Donor list grid */
+      .donor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .donor-card {
+        background: #ffffff;
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      }
+
+      .donor-info h4 {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--text);
+      }
+
+      .donor-info p {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .donor-info .amount {
+        display: inline-block;
+        margin-top: 6px;
+        color: var(--primary);
+        font-weight: 800;
+        font-size: 14px;
+      }
+
+      .btn-sm-verify {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        transition: background 0.2s;
+      }
+
+      .btn-sm-verify:hover {
+        background: #059669;
+      }
+
+      .quick-action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+      }
+
+      .quick-card {
+        background: #ffffff;
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .quick-card:hover {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        transform: translateY(-2px);
+      }
+
+      .quick-card-info h4 {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--primary-dark);
+      }
+
+      .quick-card-info p {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .quick-icon {
+        font-size: 22px;
+      }
+
+      @media (max-width: 640px) {
+        .nav-tabs {
+          flex-wrap: wrap;
+        }
+        .nav-tab {
+          min-width: 45%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="app-container">
+      
+      <!-- Header -->
+      <div class="header">
+        <div class="header-brand">
+          <div class="logo-icon">🌸</div>
+          <div>
+            <h1>SRIKANDI BALI — WEB ADMIN PORTAL</h1>
+            <p>Pusat Pengelolaan Data Acara, Donasi, & Rekening</p>
+          </div>
+        </div>
+        <div class="header-badge">
+          ⚡ Mode Full Screen Web App
+        </div>
+      </div>
+
+      <!-- Alert Notification -->
+      <div id="statusAlert" class="alert"></div>
+
+      <!-- Navigation Tabs -->
+      <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('eventTab')">
+          <span>📌</span> Kelola Event
+        </button>
+        <button class="nav-tab" onclick="switchTab('donasiTab')">
+          <span>💖</span> Donasi & Verifikasi
+        </button>
+        <button class="nav-tab" onclick="switchTab('rekeningTab')">
+          <span>💳</span> Rekening Bank
+        </button>
+        <button class="nav-tab" onclick="switchTab('quickTab')">
+          <span>⚡</span> Sinkronisasi & Aksi
+        </button>
+      </div>
+
+      <!-- TAB 1: KELOLA EVENT -->
+      <div id="eventTab" class="tab-content active">
+        <div class="card">
+          <div class="card-title">➕ Tambah Acara / Event Baru</div>
+          <form id="eventForm" onsubmit="submitEventForm(event)">
+            
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Judul Acara / Event *</label>
+                <input type="text" id="evtTitle" placeholder="Contoh: Seminar Hukum Perkawinan Campur & Hak Asuh Anak" required />
+              </div>
+
+              <div class="form-group">
+                <label>Kategori Acara</label>
+                <select id="evtCategory">
+                  <option value="Workshop/Legal">Workshop / Legal</option>
+                  <option value="Charity/Amal">Charity / Amal</option>
+                  <option value="Social/Gathering">Social / Gathering</option>
+                  <option value="Culture/Seni">Culture / Seni</option>
+                  <option value="Edukasi">Edukasi</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Kapasitas Kuota Peserta (Orang)</label>
+                <input type="number" id="evtCapacity" value="50" min="5" />
+              </div>
+
+              <div class="form-group">
+                <label>Tanggal Acara (YYYY-MM-DD)</label>
+                <input type="date" id="evtDate" required />
+              </div>
+
+              <div class="form-group">
+                <label>Waktu Pelaksanaan</label>
+                <input type="text" id="evtTime" placeholder="Contoh: 10:00 - 13:00 WITA" value="10:00 - 13:00 WITA" required />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Lokasi / Alamat Acara</label>
+                <input type="text" id="evtLocation" placeholder="Contoh: Sanur Resort & Convention, Denpasar Bali" required />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Foto Banner / Flyer (Link Google Drive atau URL Gambar)</label>
+                <input type="text" id="evtImage" placeholder="https://drive.google.com/file/d/..." />
+              </div>
+
+              <div class="form-group">
+                <label>Narasumber / Pembicara</label>
+                <input type="text" id="evtSpeaker" placeholder="Nama Notaris / Pengacara / Pengurus" />
+              </div>
+
+              <div class="form-group">
+                <label>No. WhatsApp Info & RSVP</label>
+                <input type="text" id="evtPhone" placeholder="081234567890" value="081234567890" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Poin Sorotan / Fasilitas (Dipisahkan Titik Koma ';')</label>
+                <input type="text" id="evtHighlights" placeholder="Konsultasi Hukum 1-on-1; Coffee Break & Lunch; Sertifikat Resmi" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Ringkasan & Deskripsi Acara</label>
+                <textarea id="evtSummary" placeholder="Jelaskan agenda dan manfaat acara bagi para anggota dan masyarakat umum..."></textarea>
+              </div>
+            </div>
+
+            <button type="submit" id="btnSubmitEvent" class="btn btn-primary" style="margin-top: 10px;">
+              💾 Simpan Acara ke Google Sheets & Publikasikan ke Website
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB 2: DONASI & VERIFIKASI -->
+      <div id="donasiTab" class="tab-content">
+        <!-- Verifikasi Donatur Pending -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div class="card-title" style="margin: 0; border: none; padding: 0;">⏳ Daftar Donatur Menunggu Verifikasi</div>
+            <button onclick="loadPendingDonors()" class="btn btn-outline" style="font-size: 11px; padding: 6px 12px;">
+              🔄 Segarkan Data
+            </button>
+          </div>
+          
+          <div id="pendingDonorsList">
+            <p style="font-size: 12px; color: var(--text-muted);">Memuat daftar donatur...</p>
+          </div>
+        </div>
+
+        <!-- Tambah Program Donasi -->
+        <div class="card">
+          <div class="card-title">➕ Tambah Program Aksi Amal / Donasi Baru</div>
+          <form id="campaignForm" onsubmit="submitCampaignForm(event)">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Judul Program Amal *</label>
+                <input type="text" id="campTitle" placeholder="Contoh: Bantuan Beasiswa Pendidikan Anak Srikandi Pra-Sejahtera" required />
+              </div>
+
+              <div class="form-group">
+                <label>Target Dana yang Dibutuhkan (Rp)</label>
+                <input type="number" id="campTarget" placeholder="25000000" required />
+              </div>
+
+              <div class="form-group">
+                <label>Lokasi Penyaluran</label>
+                <input type="text" id="campLocation" placeholder="Denpasar, Bali" value="Bali" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Penerima Manfaat</label>
+                <input type="text" id="campBeneficiaries" placeholder="Contoh: 30 Anak Yatim & Keluarga Pra-Sejahtera di Bali" required />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Foto Banner Program (Link Google Drive atau URL Gambar)</label>
+                <input type="text" id="campImage" placeholder="https://drive.google.com/file/d/..." />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Deskripsi Program Amal</label>
+                <textarea id="campDesc" placeholder="Jelaskan latar belakang dan detail penyaluran donasi ini..."></textarea>
+              </div>
+            </div>
+
+            <button type="submit" id="btnSubmitCampaign" class="btn btn-primary" style="margin-top: 10px;">
+              💾 Simpan Program Donasi ke Website
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB 3: REKENING BANK -->
+      <div id="rekeningTab" class="tab-content">
+        <div class="card">
+          <div class="card-title">➕ Tambah Rekening Resmi Donasi</div>
+          <form id="rekeningForm" onsubmit="submitRekeningForm(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nama Bank *</label>
+                <input type="text" id="rekBank" placeholder="Contoh: Bank BCA / Bank Mandiri / Bank BRI" required />
+              </div>
+
+              <div class="form-group">
+                <label>Nomor Rekening *</label>
+                <input type="text" id="rekNumber" placeholder="Contoh: 7720-9981-22" required />
+              </div>
+
+              <div class="form-group">
+                <label>Atas Nama Pemilik Rekening *</label>
+                <input type="text" id="rekHolder" value="Yayasan Srikandi Mix Marriage Bali" required />
+              </div>
+
+              <div class="form-group">
+                <label>Kantor Cabang (Opsional)</label>
+                <input type="text" id="rekBranch" placeholder="Contoh: KCU Denpasar" />
+              </div>
+            </div>
+
+            <button type="submit" id="btnSubmitRekening" class="btn btn-primary" style="margin-top: 10px;">
+              💾 Simpan Rekening & Tampilkan di Formulir Donasi
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- TAB 4: SINKRONISASI & AKSI CEPAT -->
+      <div id="quickTab" class="tab-content">
+        <div class="card">
+          <div class="card-title">⚡ Otomatisasi & Sinkronisasi Data</div>
+          
+          <div class="quick-action-grid">
+            <div class="quick-card" onclick="runRecalculateDonations()">
+              <div class="quick-card-info">
+                <h4>📊 Hitung Ulang Total Donasi</h4>
+                <p>Sinkronkan donatur terkonfirmasi ke tab Campaigns</p>
+              </div>
+              <span class="quick-icon">💰</span>
+            </div>
+
+            <div class="quick-card" onclick="runRecalculateParticipants()">
+              <div class="quick-card-info">
+                <h4>👥 Hitung Ulang Peserta Event</h4>
+                <p>Sinkronkan pendaftar di tab Peserta ke tab Events</p>
+              </div>
+              <span class="quick-icon">🎟️</span>
+            </div>
+
+            <div class="quick-card" onclick="runFormatSheets()">
+              <div class="quick-card-info">
+                <h4>🎨 Rapikan Format Semua Sheet</h4>
+                <p>Format header & warna resmi Srikandi Bali</p>
+              </div>
+              <span class="quick-icon">✨</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Javascript Client Logic -->
+    <script>
+      function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+
+        if (tabId === 'donasiTab') {
+          loadPendingDonors();
+        }
+      }
+
+      function showAlert(msg, isSuccess = true) {
+        const alertBox = document.getElementById('statusAlert');
+        alertBox.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-error');
+        alertBox.innerText = msg;
+        alertBox.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => {
+          alertBox.style.display = 'none';
+        }, 6000);
+      }
+
+      // SUBMIT EVENT
+      function submitEventForm(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmitEvent');
+        btn.innerText = 'Menyimpan...';
+        btn.disabled = true;
+
+        const eventData = {
+          title: document.getElementById('evtTitle').value,
+          category: document.getElementById('evtCategory').value,
+          date: document.getElementById('evtDate').value,
+          time: document.getElementById('evtTime').value,
+          location: document.getElementById('evtLocation').value,
+          maxCapacity: document.getElementById('evtCapacity').value,
+          speaker: document.getElementById('evtSpeaker').value,
+          image: document.getElementById('evtImage').value,
+          summary: document.getElementById('evtSummary').value,
+          highlights: document.getElementById('evtHighlights').value,
+          phone: document.getElementById('evtPhone').value
+        };
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            btn.innerText = '💾 Simpan Acara ke Google Sheets & Publikasikan ke Website';
+            btn.disabled = false;
+            document.getElementById('eventForm').reset();
+            showAlert('✅ Acara "' + eventData.title + '" berhasil ditambahkan ke Google Sheet!');
+          })
+          .withFailureHandler((err) => {
+            btn.innerText = '💾 Simpan Acara ke Google Sheets & Publikasikan ke Website';
+            btn.disabled = false;
+            showAlert('❌ Gagal: ' + err.message, false);
+          })
+          .addNewEventFromSidebar(eventData);
+      }
+
+      // SUBMIT CAMPAIGN
+      function submitCampaignForm(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmitCampaign');
+        btn.innerText = 'Menyimpan...';
+        btn.disabled = true;
+
+        const campData = {
+          title: document.getElementById('campTitle').value,
+          targetAmount: document.getElementById('campTarget').value,
+          location: document.getElementById('campLocation').value,
+          beneficiaries: document.getElementById('campBeneficiaries').value,
+          image: document.getElementById('campImage').value,
+          description: document.getElementById('campDesc').value
+        };
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            btn.innerText = '💾 Simpan Program Donasi ke Website';
+            btn.disabled = false;
+            document.getElementById('campaignForm').reset();
+            showAlert('✅ Program donasi berhasil ditambahkan!');
+          })
+          .withFailureHandler((err) => {
+            btn.innerText = '💾 Simpan Program Donasi ke Website';
+            btn.disabled = false;
+            showAlert('❌ Gagal: ' + err.message, false);
+          })
+          .addNewCampaignFromSidebar(campData);
+      }
+
+      // SUBMIT REKENING
+      function submitRekeningForm(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmitRekening');
+        btn.innerText = 'Menyimpan...';
+        btn.disabled = true;
+
+        const rekData = {
+          bank_name: document.getElementById('rekBank').value,
+          account_number: document.getElementById('rekNumber').value,
+          account_holder: document.getElementById('rekHolder').value,
+          branch: document.getElementById('rekBranch').value
+        };
+
+        google.script.run
+          .withSuccessHandler((res) => {
+            btn.innerText = '💾 Simpan Rekening & Tampilkan di Formulir Donasi';
+            btn.disabled = false;
+            document.getElementById('rekeningForm').reset();
+            showAlert('✅ Rekening ' + rekData.bank_name + ' berhasil ditambahkan!');
+          })
+          .withFailureHandler((err) => {
+            btn.innerText = '💾 Simpan Rekening & Tampilkan di Formulir Donasi';
+            btn.disabled = false;
+            showAlert('❌ Gagal: ' + err.message, false);
+          })
+          .addNewRekeningFromSidebar(rekData);
+      }
+
+      // LOAD PENDING DONORS
+      function loadPendingDonors() {
+        const container = document.getElementById('pendingDonorsList');
+        container.innerHTML = '<p style="font-size: 12px; color: var(--text-muted);">Memuat donatur yang menunggu konfirmasi...</p>';
+
+        google.script.run
+          .withSuccessHandler((donors) => {
+            if (!donors || donors.length === 0) {
+              container.innerHTML = '<div style="background: #ecfdf5; border: 1px solid #a7f3d0; padding: 16px; border-radius: 12px; color: #065f46; font-weight: 700;">✨ Semua donasi telah terkonfirmasi! Tidak ada donatur pending.</div>';
+              return;
+            }
+
+            let html = '<div class="donor-grid">';
+            donors.forEach((d) => {
+              html += `
+                <div class="donor-card">
+                  <div class="donor-info">
+                    <h4>${d.nama}</h4>
+                    <p>Program ID: <strong>${d.campaignId}</strong></p>
+                    <p style="font-size: 10px; color: var(--text-muted);">${d.tanggal || 'Baru Saja'}</p>
+                    <span class="amount">Rp ${Number(d.jumlah_donasi).toLocaleString('id-ID')}</span>
+                  </div>
+                  <button onclick="verifyDonorRow(${d.rowIndex})" class="btn-sm-verify">
+                    ✓ Konfirmasi Sekarang
+                  </button>
+                </div>
+              `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+          })
+          .withFailureHandler((err) => {
+            container.innerHTML = '<p style="font-size: 12px; color: #ef4444;">Gagal memuat: ' + err.message + '</p>';
+          })
+          .getPendingDonors();
+      }
+
+      // VERIFY DONOR ROW
+      function verifyDonorRow(rowIdx) {
+        google.script.run
+          .withSuccessHandler(() => {
+            showAlert('✅ Donatur berhasil diverifikasi! Dana terkumpul di website otomatis bertambah.');
+            loadPendingDonors();
+          })
+          .withFailureHandler((err) => {
+            showAlert('❌ Gagal verifikasi: ' + err.message, false);
+          })
+          .verifyDonorByRow(rowIdx);
+      }
+
+      // QUICK ACTIONS
+      function runRecalculateDonations() {
+        google.script.run
+          .withSuccessHandler((msg) => showAlert(msg || '✅ Total donasi berhasil dihitung ulang!'))
+          .recalculateAllCampaignTotals();
+      }
+
+      function runRecalculateParticipants() {
+        google.script.run
+          .withSuccessHandler((msg) => showAlert(msg || '✅ Total peserta berhasil disinkronkan!'))
+          .recalculateAllEventParticipants();
+      }
+
+      function runFormatSheets() {
+        google.script.run
+          .withSuccessHandler((msg) => showAlert('✨ Semua tab Google Sheets telah diformat rapi!'))
+          .formatAllSheets();
+      }
+    </script>
+  </body>
+</html>

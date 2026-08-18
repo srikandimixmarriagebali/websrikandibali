@@ -5,7 +5,7 @@ import { Event } from '../types';
 interface RsvpModalProps {
   event: Event | null;
   onClose: () => void;
-  onConfirmRegistration: (eventId: string) => void;
+  onConfirmRegistration: (eventId: string, participantData: { nama: string; phone?: string; email?: string }) => void;
 }
 
 export const RsvpModal: React.FC<RsvpModalProps> = ({ event, onClose, onConfirmRegistration }) => {
@@ -20,7 +20,11 @@ export const RsvpModal: React.FC<RsvpModalProps> = ({ event, onClose, onConfirmR
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onConfirmRegistration(event.id);
+    onConfirmRegistration(event.id, {
+      nama: fullName.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+    });
     setIsSubmitted(true);
   };
 

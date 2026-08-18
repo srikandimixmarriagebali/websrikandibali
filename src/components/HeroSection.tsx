@@ -2,15 +2,23 @@ import React from 'react';
 import { Sparkles, Calendar, MapPin, ArrowRight, Users, Gift } from 'lucide-react';
 import { Event } from '../types';
 import { Language, translations } from '../data/translations';
+import { DriveImage } from './DriveImage';
 
 interface HeroSectionProps {
   language: Language;
   theme: 'dark' | 'light';
   nextEvent?: Event;
+  isLoading?: boolean;
   onSelectEvent: (event: Event) => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ language, theme, nextEvent, onSelectEvent }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({
+  language,
+  theme,
+  nextEvent,
+  isLoading = false,
+  onSelectEvent
+}) => {
   const t = translations[language].hero;
 
   return (
@@ -58,71 +66,69 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ language, theme, nextE
             <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
               <a
                 href="#events"
-                className="bg-gradient-to-r from-pink-500 via-rose-600 to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-xl shadow-pink-950/20 transition-all flex items-center gap-2 group"
+                className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold py-3.5 px-7 rounded-2xl shadow-lg shadow-pink-500/25 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-sm"
               >
-                <Calendar className="w-5 h-5 text-pink-200" />
+                <Calendar className="w-4 h-4" />
                 {t.btnEvents}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
-
               <a
-                href="#siapa-kami"
-                className={`font-semibold px-5 py-3.5 rounded-xl border transition-all flex items-center gap-2 ${
+                href="#tentang"
+                className={`font-semibold py-3.5 px-7 rounded-2xl border transition-all text-sm flex items-center gap-2 ${
                   theme === 'dark'
-                    ? 'bg-rose-900/70 hover:bg-rose-800 text-rose-100 border-rose-700/80'
-                    : 'bg-white hover:bg-rose-50 text-slate-800 border-rose-200 shadow-sm'
+                    ? 'border-pink-500/40 text-pink-200 hover:bg-rose-900/40'
+                    : 'border-rose-300 text-rose-900 bg-white/80 hover:bg-white'
                 }`}
               >
-                <Users className="w-5 h-5 text-pink-500" />
+                <Users className="w-4 h-4" />
                 {t.btnAbout}
-              </a>
-
-              <a
-                href="#konsultasi-ai"
-                className={`font-medium px-4 py-3.5 rounded-xl border transition-all flex items-center gap-2 text-xs ${
-                  theme === 'dark'
-                    ? 'bg-gradient-to-r from-fuchsia-950/80 to-rose-950/80 text-pink-200 border-fuchsia-500/40 hover:from-fuchsia-900'
-                    : 'bg-rose-50 text-rose-900 border-rose-200 hover:bg-rose-100 shadow-sm'
-                }`}
-              >
-                <Sparkles className="w-4 h-4 text-pink-500" />
-                {t.btnAi}
               </a>
             </div>
 
-            {/* Stat Counters Badge Strip */}
-            <div className="pt-6 border-t border-rose-800/40 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center lg:text-left">
-              <div className={`p-3 rounded-xl border ${
-                theme === 'dark' ? 'bg-rose-900/30 border-rose-800/50' : 'bg-white/80 border-rose-200 shadow-sm'
-              }`}>
-                <p className="text-2xl sm:text-3xl font-black text-pink-500">400+</p>
+            {/* Stat Counters Banner */}
+            <div className="pt-8 border-t border-rose-800/30 grid grid-cols-3 gap-4 max-w-lg mx-auto lg:mx-0">
+              <div className="text-center lg:text-left">
+                <span className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                  15+ Thn
+                </span>
                 <p className={`text-xs font-medium mt-0.5 ${theme === 'dark' ? 'text-rose-200' : 'text-slate-600'}`}>{t.statGlobal}</p>
               </div>
-              <div className={`p-3 rounded-xl border ${
-                theme === 'dark' ? 'bg-rose-900/30 border-rose-800/50' : 'bg-white/80 border-rose-200 shadow-sm'
-              }`}>
-                <p className="text-2xl sm:text-3xl font-black text-pink-500">150</p>
+              <div className="text-center lg:text-left">
+                <span className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                  1000+
+                </span>
                 <p className={`text-xs font-medium mt-0.5 ${theme === 'dark' ? 'text-rose-200' : 'text-slate-600'}`}>{t.statActive}</p>
               </div>
-              <div className={`p-3 rounded-xl border ${
-                theme === 'dark' ? 'bg-rose-900/30 border-rose-800/50' : 'bg-white/80 border-rose-200 shadow-sm'
-              }`}>
-                <p className="text-2xl sm:text-3xl font-black text-pink-500">85+</p>
+              <div className="text-center lg:text-left">
+                <span className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                  50+
+                </span>
                 <p className={`text-xs font-medium mt-0.5 ${theme === 'dark' ? 'text-rose-200' : 'text-slate-600'}`}>{t.statEvents}</p>
-              </div>
-              <div className={`p-3 rounded-xl border ${
-                theme === 'dark' ? 'bg-rose-900/30 border-rose-800/50' : 'bg-white/80 border-rose-200 shadow-sm'
-              }`}>
-                <p className="text-2xl sm:text-3xl font-black text-pink-500">100%</p>
-                <p className={`text-xs font-medium mt-0.5 ${theme === 'dark' ? 'text-rose-200' : 'text-slate-600'}`}>{t.statNonProfit}</p>
               </div>
             </div>
 
           </div>
 
-          {/* Right Column: Featured Next Event Card */}
+          {/* Right Column: Featured Next Event Card / Skeleton */}
           <div className="lg:col-span-5">
-            {nextEvent ? (
+            {isLoading ? (
+              /* Sleek Skeleton Card */
+              <div className={`relative rounded-2xl border p-6 shadow-2xl backdrop-blur-md animate-pulse ${
+                theme === 'dark'
+                  ? 'bg-rose-950/60 border-rose-800/60'
+                  : 'bg-white border-rose-200 shadow-xl'
+              }`}>
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="h-6 w-28 bg-rose-500/20 rounded-full" />
+                  <div className="h-4 w-20 bg-rose-500/20 rounded-md" />
+                </div>
+                <div className="h-48 rounded-xl bg-slate-800/40 mb-4 flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-pink-400/30 animate-spin" />
+                </div>
+                <div className="h-5 w-3/4 bg-rose-500/20 rounded mb-2" />
+                <div className="h-4 w-1/2 bg-rose-500/20 rounded mb-4" />
+                <div className="h-12 w-full bg-gradient-to-r from-pink-500/30 to-rose-600/30 rounded-xl" />
+              </div>
+            ) : nextEvent ? (
               <div className={`relative rounded-2xl border p-6 shadow-2xl backdrop-blur-md ${
                 theme === 'dark'
                   ? 'bg-gradient-to-br from-rose-900/90 via-rose-950 to-pink-950 border-rose-700/70 text-white'
@@ -142,14 +148,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ language, theme, nextE
 
                 {/* Event Image */}
                 <div className="relative h-48 rounded-xl overflow-hidden mb-4 border border-rose-300/40">
-                  <img
+                  <DriveImage
                     src={nextEvent.image}
                     alt={nextEvent.title}
-                    referrerPolicy="no-referrer"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-80" />
-                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-80 pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between z-10">
                     <span className="bg-rose-900/90 text-pink-200 text-xs px-2.5 py-1 rounded-lg border border-pink-500/30 font-semibold">
                       {nextEvent.category}
                     </span>

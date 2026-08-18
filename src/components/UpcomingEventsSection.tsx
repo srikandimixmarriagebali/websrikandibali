@@ -1,32 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, Users, Search, Download, Edit3, CheckCircle, Gift, Share2, Check } from 'lucide-react';
-import { Event } from '../types';
+import { Calendar, Clock, MapPin, Users, Search, Edit3, CheckCircle, Gift, Share2, Check, X, UserCheck } from 'lucide-react';
+import { Event, EventParticipant } from '../types';
 import { Language, translations } from '../data/translations';
+import { DriveImage } from './DriveImage';
 
 interface UpcomingEventsSectionProps {
   language: Language;
   theme: 'dark' | 'light';
   events: Event[];
+  participants?: EventParticipant[];
   onSelectEvent: (event: Event) => void;
-  isAdmin: boolean;
-  onEditEvent?: (event: Event) => void;
-  onMarkAsFinished?: (event: Event) => void;
+  isLoading?: boolean;
 }
 
 export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({
   language,
   theme,
   events,
+  participants = [],
   onSelectEvent,
-  isAdmin,
-  onEditEvent,
-  onMarkAsFinished
+  isLoading = false
 }) => {
   const t = translations[language].upcomingEvents;
 
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [copiedEventId, setCopiedEventId] = useState<string | null>(null);
+  const [selectedEventForParticipants, setSelectedEventForParticipants] = useState<Event | null>(null);
+  const [participantSearch, setParticipantSearch] = useState<string>('');
 
   const upcomingEvents = events.filter((e) => e.status === 'upcoming');
   const categories = ['Semua', 'Charity/Amal', 'Workshop/Legal', 'Social/Gathering', 'Culture/Seni', 'Edukasi'];
@@ -196,8 +197,31 @@ END:VCALENDAR`;
           </div>
         </div>
 
-        {/* Grid */}
-        {filteredEvents.length > 0 ? (
+        {/* Grid / Skeleton */}
+        {isLoading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className={`rounded-3xl border shadow-lg overflow-hidden flex flex-col animate-pulse ${
+                  theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-white border-pink-100'
+                }`}
+              >
+                <div className="h-52 bg-slate-800/40 relative flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-rose-500/20 animate-ping" />
+                </div>
+                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2.5">
+                    <div className="h-5 bg-rose-500/20 rounded-md w-3/4" />
+                    <div className="h-4 bg-slate-700/30 rounded-md w-1/2" />
+                    <div className="h-4 bg-slate-700/30 rounded-md w-2/3" />
+                  </div>
+                  <div className="h-11 bg-rose-500/20 rounded-xl w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredEvents.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredEvents.map((event) => (
               <div
@@ -207,10 +231,9 @@ END:VCALENDAR`;
                 }`}
               >
                 <div className="relative h-52 overflow-hidden bg-slate-100">
-                  <img
+                  <DriveImage
                     src={event.image}
                     alt={event.title}
-                    referrerPolicy="no-referrer"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
@@ -254,14 +277,21 @@ END:VCALENDAR`;
                         {t.btnRsvp}
                       </button>
 
+                      {/* Tombol Daftar Nama Peserta yang Sudah Mendaftar */}
                       <button
-                        onClick={() => handleDownloadIcs(event)}
-                        className={`w-full text-xs font-semibold py-2.5 px-3 rounded-xl border transition-all flex items-center justify-center gap-1 ${
-                          theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                        onClick={() => {
+                          setSelectedEventForParticipants(event);
+                          setParticipantSearch('');
+                        }}
+                        className={`w-full text-xs font-semibold py-2.5 px-3 rounded-xl border transition-all flex items-center justify-center gap-1.5 ${
+                          theme === 'dark'
+                            ? 'bg-slate-900 border-slate-800 text-pink-300 hover:bg-slate-800'
+                            : 'bg-pink-50/80 border-pink-200 text-rose-800 hover:bg-pink-100'
                         }`}
+                        title="Lihat Daftar Peserta yang Sudah Mendaftar"
                       >
-                        <Download className="w-3.5 h-3.5" />
-                        Calendar
+                        <Users className="w-3.5 h-3.5 text-rose-500" />
+                        Peserta ({participants.filter((p) => p.even_id === event.id).length})
                       </button>
                     </div>
 
@@ -277,21 +307,6 @@ END:VCALENDAR`;
                           </>
                         )}
                       </button>
-
-                      {isAdmin && (
-                        <div className="flex items-center gap-2">
-                          {onEditEvent && (
-                            <button onClick={() => onEditEvent(event)} className="text-indigo-400 hover:underline flex items-center gap-1 font-semibold">
-                              <Edit3 className="w-3 h-3" /> Edit
-                            </button>
-                          )}
-                          {onMarkAsFinished && (
-                            <button onClick={() => onMarkAsFinished(event)} className="text-emerald-400 hover:underline flex items-center gap-1 font-semibold">
-                              <CheckCircle className="w-3 h-3" /> Finish
-                            </button>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -307,6 +322,107 @@ END:VCALENDAR`;
         )}
 
       </div>
+
+      {/* POPUP MODAL: DAFTAR PESERTA TERDAFTAR */}
+      {selectedEventForParticipants && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-pink-100 relative my-8 text-slate-900">
+            <button
+              onClick={() => setSelectedEventForParticipants(null)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-900 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-100 text-rose-700 text-[11px] font-bold uppercase tracking-wider mb-2">
+                  <UserCheck className="w-3.5 h-3.5 text-rose-600" />
+                  Daftar Peserta Terdaftar
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 leading-snug">
+                  {selectedEventForParticipants.title}
+                </h3>
+                <p className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                  <span>📅 {selectedEventForParticipants.date} ({selectedEventForParticipants.time})</span>
+                  <span>•</span>
+                  <span>📍 {selectedEventForParticipants.location}</span>
+                </p>
+              </div>
+
+              {/* Search Filter in participants list */}
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Cari nama peserta..."
+                  value={participantSearch}
+                  onChange={(e) => setParticipantSearch(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+
+              {/* Participants List */}
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {(() => {
+                  const eventPeserta = participants
+                    .filter((p) => p.even_id === selectedEventForParticipants.id)
+                    .filter((p) => p.nama.toLowerCase().includes(participantSearch.toLowerCase()));
+
+                  if (eventPeserta.length === 0) {
+                    return (
+                      <div className="text-center py-8 bg-pink-50/50 rounded-2xl border border-pink-100 space-y-2">
+                        <Users className="w-8 h-8 text-rose-400 mx-auto opacity-60" />
+                        <p className="text-xs font-semibold text-slate-700">Belum ada peserta terdaftar</p>
+                        <p className="text-[11px] text-slate-500">Jadilah yang pertama mendaftar untuk acara ini!</p>
+                      </div>
+                    );
+                  }
+
+                  return eventPeserta.map((peserta, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between hover:bg-pink-50/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                          {peserta.nama.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-900">{peserta.nama}</h4>
+                          <span className="text-[10px] text-slate-400">
+                            {peserta.registered_at ? `Terdaftar: ${peserta.registered_at}` : 'Terdaftar di Srikandi Bali'}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Hadir
+                      </span>
+                    </div>
+                  ));
+                })()}
+              </div>
+
+              <div className="pt-2 border-t flex items-center justify-between text-xs">
+                <span className="text-slate-500 font-medium">
+                  Total Peserta: <strong className="text-rose-600">{participants.filter((p) => p.even_id === selectedEventForParticipants.id).length} Orang</strong>
+                </span>
+                <button
+                  onClick={() => {
+                    const evt = selectedEventForParticipants;
+                    setSelectedEventForParticipants(null);
+                    onSelectEvent(evt);
+                  }}
+                  className="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition-all"
+                >
+                  <Gift className="w-3.5 h-3.5" /> Daftar Sekarang
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 };
